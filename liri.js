@@ -161,16 +161,3 @@ fs.appendFile("log.txt", logQuery, function(err) {
   
   });
 
-//Data Log
-
-function dataLog(data) {
-    fs.appendFile("log.txt", data, function(err) {
-
-        if (err) {
-          console.log(err);
-        } else {
-          console.log("Log Updated");
-        }
-      
-      });
-  }
