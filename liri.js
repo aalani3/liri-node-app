@@ -1,91 +1,176 @@
-
-// Define dependent variables so they're global
 require("dotenv").config();
-// NPM Packages & API keys
-var keys = require("./keys.js");
-var Spotify = require('node-spotify-api');
 var axios = require("axios");
 var moment = require("moment");
-// for read & write
 var fs = require("fs");
-var query = process.argv[3];
 
-// Check Keys
-// console.log(keys);
-var option = process.argv[2];
-// console.log(option);
+var env = process.env;
 
+var Spotify = require('node-spotify-api');
 
-// Initialize Spotify client
-var spotify = new Spotify(keys.spotify);
-switch (option) {
-    case "movie-this":
-        movieThis(query);
-        break;
-    case "spotify-this-song":
-        spotifyCall(query);
-        break;
-    case "concert-this":
-        concertThis(query);
-        break;
-    default:
-        // 1- read file
-        fs.readFile("random.txt", "utf8", function (error, data) {
-            // 2-retrieve content & parse string
-            var data = data.split(",");
-            var thatWay = data[1];
-            if (error) {
-                return console.log(error);
-            }
-            // 3-call function 
-            spotifyCall(thatWay);
-        })
+var spotify = new Spotify({
+    id: env.SPOTIFY_ID,
+    secret: env.SPOTIFY_SECRET
+});
 
+var query = process.argv;
+var type = process.argv[2];
+var array = [];
+
+for (var i = 3; i < query.length; i++) {
+    array.push(query[i]);
+    array.push("+")
 }
 
-// FUNCTIONS
-// SPOTIFY-THIS-SONG
-function spotifyCall(songName) {
-    spotify.search({ type: 'track', query: songName }, function (err, data) {
+array.splice(-1); 
+var finalSearch = array.join(""); 
+
+//Switch statement to determine type
+switch (type) {
+    case 'concert-this':
+        concertMe()
+        break;
+    case 'spotify-this-song':
+        spotifyIt()
+        break;
+    case 'movie-this':
+        movieThis()
+        break;
+    case 'do-what-it-says':
+        itSays()
+        break;
+    default:
+        console.log(" value not found");
+}
+
+
+function concertMe() {
+    if (finalSearch === "") {
+        console.log('\n')
+        console.log(" enter an Artist")
+        console.log('\n')
+    } else {
+        axios.get("https://rest.bandsintown.com/artists/" + finalSearch + "/events?app_id=codingbootcamp").then(
+        function (response) {
+           if(response.data.length <= 0) {
+               console.log("No info for Artist")
+           }else {
+            for(var i=0; i < response.data.length; i++) {
+
+                var currData = `\n
+    Venue: ${response.data[i].venue.name}
+    Location: ${response.data[i].venue.city + ", " + response.data[0].venue.region}
+    Event Date: ${moment(response.data[i].datetime).format('LL')}
+            `
+            console.log(currData)
+            }
+           }
+           
+            dataLog(currData)
+        }
+    );
+    }
+}
+
+// spotify-this-song
+
+function spotifyIt() {
+
+    if (finalSearch === "") {
+        finalSearch = "Radioactive"
+    }
+
+    spotify.search({
+        type: 'artist,track',
+        query: finalSearch
+    }, function (err, data) {
         if (err) {
             return console.log('Error occurred: ' + err);
         }
-        console.log("\n_Track Info_" + "\nArtist: " + data.tracks.items[0].artists[0].name + "\nSong: " + data.tracks.items[0].name + "\nLink: " + data.tracks.items[0].external_urls.spotify + "\nAlbum: " + data.tracks.items[0].album.name + "\n" + "\nGreat song! Search another :)")
+        console.log('\n')
+
+        var currData = `\n
+    Artist: ${data.tracks.items[0].artists[0].name}
+    Track: ${data.tracks.items[0].name}
+    Preview: ${data.tracks.items[0].preview_url}
+    Album: ${data.tracks.items[0].album.name}
+            `
+            console.log(currData)
+            dataLog(currData)
+
     });
 }
 
-// MOVIE-THIS
-// Then run a request with axios to the OMDB API with the movie specified
-function movieThis(movieName) {
-    if (!movieName) {
-        movieName = "Mr. Nobody";
+//  movie-this
+
+function movieThis() {
+
+    if (finalSearch === "") {
+        finalSearch = "mr+nobody"
     }
-    var queryUrl = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy";
-    // // This line is just to help us debug against the actual URL.
-    // Creating a request with axios to the queryUrl
-    axios.get(queryUrl).then(
+
+    axios.get("http://www.omdbapi.com/?t=" + finalSearch + "&y=&plot=short&apikey=trilogy").then(
         function (response) {
-            if (!movieName) {
-                movieName = "Mr. Nobody";
-            }// console.log(response.data);
-            // Data of Movie
-            console.log("\n_Movie Info_" + "\nTitle: " + response.data.Title + "\nRelease Year: " + response.data.Year + "\nRating: " + response.data.Rated + "\nRelease Country: " + response.data.Country + "\nLanguage: " + response.data.Language + "\nPlot: " + response.data.Plot + "\nActors: " + response.data.Actors + "\n" + "\n Love this one!");
-
-
+        
+            var currData = `\n
+    Title: ${response.data.Title}
+    Released: ${response.data.Year}
+    IMDB Rating: ${response.data.imdbRating}
+    Rotten Tomatos Rating: ${response.data.Ratings[1].Value}
+    Country: ${response.data.Country}
+    Language: ${response.data.Language}
+    Plot: ${response.data.Plot}
+    Actors: ${response.data.Actors}
+            `
+            console.log(currData)
+            dataLog(currData)
         }
     );
+
+    
 }
 
+// do-what-it-says
 
-// CONCERT-THIS
-// Then run a request with axios to the BiT API with the artist specified
-function concertThis(artist) {
-    var bandsQueryUrl = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
-    // // This line is just to help us debug against the actual URL.
-    // Creating a request with axios to the queryUrl
-    axios.get(bandsQueryUrl).then(
-        function (response) {
-            console.log("_Upcoming Events_");
-            console.log("Artist: " + artist + "\nVenue: " + response.data[0].venue.name + "\nLocation: " + response.data[0].venue.country + "\nDate: " + response.data[0].datatime + "\nRock on dude!");
-        });
+function itSays() {
+    fs.readFile("random.txt", "utf8", function(error, data) {
+
+        if (error) {
+          return console.log(error);
+        }
+
+        var dataArr = data.split(",");
+      
+        finalSearch = dataArr[1];
+        spotifyIt()
+      });
 }
+
+//Input Log
+
+var logQuery = query.splice(0,2)
+logQuery =  "\n" + query.join(" ") + "\n"
+console.log(logQuery)
+
+fs.appendFile("log.txt", logQuery, function(err) {
+
+    if (err) {
+      console.log(err);
+    } else {
+      console.log("Log Updated");
+    }
+  
+  });
+
+//Data Log
+
+function dataLog(data) {
+    fs.appendFile("log.txt", data, function(err) {
+
+        if (err) {
+          console.log(err);
+        } else {
+          console.log("Log Updated");
+        }
+      
+      });
+  }

@@ -1,0 +1,37 @@
+
+-----Movie Log-----
+Title : Mr. Nobody
+Release Year : 2009
+IMDB Rating : 7.8
+Rotten Tomato Rating : 67%
+Country: Belgium, Germany, Canada, France, USA, UK
+Language: English, Mohawk
+Plot: A boy stands on a station platform as a train is about to leave. Should he go with his mother or stay with his father? Infinite possibilities arise from this decision. As long as he doesn't choose, anything is possible.
+Actors: Jared Leto, Sarah Polley, Diane Kruger, Linh Dan Pham
+
+
+
+spotify-this-song
+
+
+    Artist: Pantones
+    Track: The Sign - Ace Of Base Cover
+    Preview: https://p.scdn.co/mp3-preview/b776967c99853086b23b79ae3c83db64a4b2cfda?cid=8f6a1b08edea47d0b0dd3c6117333133
+    Album: ¿Quién Quiere Primavera ?
+            
+spotify-this-song
+
+
+    Artist: Camila Cabello
+    Track: Havana (feat. Young Thug)
+    Preview: https://p.scdn.co/mp3-preview/663b794c2fc8da8f9bbe33698cb1bac567126a23?cid=8f6a1b08edea47d0b0dd3c6117333133
+    Album: Camila
+            
+spotify-this-song
+
+
+    Artist: Imagine Dragons
+    Track: Radioactive
+    Preview: null
+    Album: Night Visions
+            
